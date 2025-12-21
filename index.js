@@ -1,2 +1,1 @@
-console.log("this is index");
-
+export * from "./src/index.js";

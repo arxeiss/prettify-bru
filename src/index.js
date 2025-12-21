@@ -1,3 +1,12 @@
-exports.printMsg = function() {
-  console.log("This is a message from src/index.js");
+function check() {
+  console.log("This is check");
 }
+
+function format() {
+  console.log("This is format");
+}
+
+export {
+  check,
+  format
+};
