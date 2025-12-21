@@ -1,6 +1,6 @@
 {
   "name": "prettify-bru",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Prettifies JSON and JavaScript blocks in Bruno .bru files",
   "keywords": [
     "bruno",
@@ -28,7 +28,7 @@
   "dependencies": {
     "yargs": "15.4.1"
   },
-  "main": "index",
+  "main": "./index",
   "scripts": {
     "test": "test"
   }
