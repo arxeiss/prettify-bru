@@ -192,6 +192,30 @@ describe('The format() function', function () {
         })
     })
 
+    it('reports valid files as not changeable', async () => {
+        const originalFileContents = [
+            'meta {',
+            '  name: Get Bananas',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '    "this": "that"',
+            '  }',
+            '}',
+            '',
+            'tests {',
+            '  console.log("Hello")',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(1)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(false)
+        })
+    })
+
     it('searches for all 4 blocks when `only` is null', async () => {
         expect.assertions(1)
         return format('file contents', null).then(result => {
