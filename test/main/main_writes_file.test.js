@@ -13,14 +13,14 @@ test('main() writes file when write mode is true', async () => {
     const {readFile, writeFile} = await import('../../lib/files.mjs')
 
     jest.unstable_mockModule('../../lib/format.mjs', () => ({
-        formatBlocks: jest.fn().mockName('mockFormatBlocks').mockReturnValue({
+        format: jest.fn().mockName('mockformat').mockReturnValue({
             newContents: 'New file contents',
             changeable: true,
-            error_messages: [],
+            errorMessages: [],
         }),
     }))
 
-    const {formatBlocks} = await import('../../lib/format.mjs')
+    const {format} = await import('../../lib/format.mjs')
 
     const {main} = await import('../../lib/main.mjs')
 
@@ -28,7 +28,7 @@ test('main() writes file when write mode is true', async () => {
 
     return main(mockConsole, '/home', 'bruno-collection', true).then(() => {
         expect(readFile).toHaveBeenCalledTimes(1)
-        expect(formatBlocks).toHaveBeenCalledWith('mock file contents', null)
+        expect(format).toHaveBeenCalledWith('mock file contents', null)
         expect(writeFile).toHaveBeenCalledWith(
             '/home/bruno-collection/Simple GET Request.bru',
             'New file contents'

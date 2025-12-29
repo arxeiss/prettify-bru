@@ -1,7 +1,7 @@
 import {describe, expect, it} from '@jest/globals'
-import {formatBlocks} from '../lib/format'
+import {format} from '../lib/format'
 
-describe('The formatBlocks() function', function () {
+describe('The format() function', function () {
     it('reformats JSON and JavaScript blocks', async () => {
         const originalFileContents = [
             'meta {',
@@ -17,7 +17,7 @@ describe('The formatBlocks() function', function () {
             '',
             'script:pre-request {',
             '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation and a semi-colon
+            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
             '    })',
             '}',
             '',
@@ -44,9 +44,9 @@ describe('The formatBlocks() function', function () {
         ].join('\n')
 
         expect.assertions(3)
-        return formatBlocks(originalFileContents).then(result => {
-            expect(result.changeable).toBe(2)
-            expect(result.error_messages).toStrictEqual([])
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
         })
     })
@@ -72,9 +72,9 @@ describe('The formatBlocks() function', function () {
         ].join('\n')
 
         expect.assertions(3)
-        return formatBlocks(originalFileContents).then(result => {
-            expect(result.changeable).toBe(0)
-            expect(result.error_messages).toStrictEqual([])
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(false)
+            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(originalFileContents)
         })
     })
@@ -119,9 +119,9 @@ describe('The formatBlocks() function', function () {
         ].join('\n')
 
         expect.assertions(3)
-        return formatBlocks(originalFileContents).then(result => {
-            expect(result.changeable).toBe(1)
-            expect(result.error_messages).toStrictEqual([])
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
         })
     })
@@ -139,17 +139,62 @@ describe('The formatBlocks() function', function () {
         ].join('\n')
 
         expect.assertions(2)
-        return formatBlocks(originalFileContents).then(result => {
-            expect(result.changeable).toBe(0)
-            expect(result.error_messages[0]).toMatch(
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(false)
+            expect(result.errorMessages[0]).toMatch(
                 /^Prettier could not format body:json because...\nThe input should contain exactly one expression/
             )
         })
     })
 
+    it('removes excess white space and new lines between blocks', async () => {
+        const originalFileContents = [
+            'meta {',
+            '  name: Get Bananas',
+            '}',
+            '',
+            '  ', // Surplus whitespace
+            '', // Surplus new line
+            'body:json {',
+            '  {',
+            '    "this": "that"',
+            '  }',
+            '}',
+            '',
+            '', // Surplus new line
+            'tests {',
+            '  console.log("Hello")',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Get Bananas',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '    "this": "that"',
+            '  }',
+            '}',
+            '',
+            'tests {',
+            '  console.log("Hello")',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(2)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
     it('searches for all 4 blocks when `only` is null', async () => {
         expect.assertions(1)
-        return formatBlocks('file contents', null).then(result => {
+        return format('file contents', null).then(result => {
             expect(result.blocksSearchedFor).toBe(4)
         })
     })
@@ -158,7 +203,7 @@ describe('The formatBlocks() function', function () {
         'searches for 1 block when `only` is set',
         async only => {
             expect.assertions(1)
-            return formatBlocks('file contents', only).then(result => {
+            return format('file contents', only).then(result => {
                 expect(result.blocksSearchedFor).toBe(1)
             })
         }

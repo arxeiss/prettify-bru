@@ -1,6 +1,6 @@
 import {jest, test, expect} from '@jest/globals'
 
-test('main() passes `only` parameter through to formatBlocks()', async () => {
+test('main() passes `only` parameter through to format()', async () => {
     jest.unstable_mockModule('../../lib/files.mjs', () => ({
         findFiles: jest.fn().mockName('mockFindFiles').mockReturnValue(['file.bru']),
         readFile: jest.fn().mockName('mockReadFile').mockReturnValue('mock original file contents'),
@@ -8,20 +8,20 @@ test('main() passes `only` parameter through to formatBlocks()', async () => {
     }))
 
     jest.unstable_mockModule('../../lib/format.mjs', () => ({
-        formatBlocks: jest.fn().mockName('mockFormatBlocks').mockReturnValue({
+        format: jest.fn().mockName('mockformat').mockReturnValue({
             newContents: 'New file contents',
             changeable: 1,
-            error_messages: [],
+            errorMessages: [],
         }),
     }))
 
-    const {formatBlocks} = await import('../../lib/format.mjs')
+    const {format} = await import('../../lib/format.mjs')
 
     const {main} = await import('../../lib/main.mjs')
 
     const mockConsole = {log: jest.fn()}
 
     return main(mockConsole, '/dir', 'collection', false, 'body:json').then(() => {
-        expect(formatBlocks).toHaveBeenCalledWith('mock original file contents', 'body:json')
+        expect(format).toHaveBeenCalledWith('mock original file contents', 'body:json')
     })
 })

@@ -1,0 +1,28 @@
+meta {
+  name: Write Apple (Valid but excess new lines)
+  type: http
+}
+  
+
+  
+
+post {
+  url: {{host}}/banana
+  body: json
+  auth: inherit
+}
+
+  
+
+body:json {
+  {
+    "roundness": 7
+  }
+}
+
+
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
