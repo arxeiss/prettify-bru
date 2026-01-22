@@ -164,6 +164,30 @@ describe('The format() function', () => {
         })
     })
 
+    it.each(['body:json', 'script:pre-request', 'script:post-response', 'tests'])(
+        'strips out an empty %s block',
+        async blockName => {
+            const originalFileContents = [
+                '',
+                'docs {',
+                '  Hello World',
+                '}',
+                '',
+                `${blockName} {`,
+                '}',
+                '',
+            ].join('\n')
+
+            const expected = ['', 'docs {', '  Hello World', '}', ''].join('\n')
+
+            expect.assertions(2)
+            return format(originalFileContents).then(result => {
+                expect(result.newContents).toBe(expected)
+                expect(result.changeable).toBe(true)
+            })
+        }
+    )
+
     it('removes excess whitespace and new lines between blocks', async () => {
         const originalFileContents = [
             'meta {',
