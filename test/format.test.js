@@ -143,24 +143,37 @@ describe('The format() function', () => {
         })
     })
 
-    it('reports invalid JSON', async () => {
+    it('puts array items on separate lines in a JSON body', async () => {
         const originalFileContents = [
             '',
             'body:json {',
-            // This JSON is missing an opening curly brace
-            '      "this": "that",',
-            '      "number": 7',
+            '  {',
+            '  "things": ["this", "that","other"]',
+            '      ',
             '  }',
             '}',
             '',
         ].join('\n')
 
-        expect.assertions(2)
+        const expected = [
+            '',
+            'body:json {',
+            '  {',
+            '    "things": [',
+            '      "this",',
+            '      "that",',
+            '      "other"',
+            '    ]',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
         return format(originalFileContents).then(result => {
-            expect(result.changeable).toBe(false)
-            expect(result.errorMessages[0]).toMatch(
-                /^Prettier could not format body:json because...\nThe input should contain exactly one expression/
-            )
+            expect(result.newContents).toBe(expected)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.changeable).toBe(true)
         })
     })
 
