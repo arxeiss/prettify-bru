@@ -143,7 +143,7 @@ describe('The format() function', () => {
         })
     })
 
-    it('reports invalid JSON', async () => {
+    it('handles invalid JSON in body', async () => {
         const originalFileContents = [
             '',
             'body:json {',
@@ -155,14 +155,81 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(2)
+        const expected = [
+            '',
+            'body:json {',
+            '  "this": "that",',
+            '  "number": 7',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
         return format(originalFileContents).then(result => {
-            expect(result.changeable).toBe(false)
-            expect(result.errorMessages[0]).toMatch(
-                /^Prettier could not format body:json because...\nThe input should contain exactly one expression/
-            )
+            expect(result.newContents).toBe(expected)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.changeable).toBe(true)
         })
     })
+
+    it('puts array items on separate lines in a JSON body', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            '  {',
+            '  "things": ["this", "that","other"]',
+            '      ',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'body:json {',
+            '  {',
+            '    "things": [',
+            '      "this",',
+            '      "that",',
+            '      "other"',
+            '    ]',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.changeable).toBe(true)
+        })
+    })
+
+    it.each(['body:json', 'script:pre-request', 'script:post-response', 'tests'])(
+        'strips out an empty %s block',
+        async blockName => {
+            const originalFileContents = [
+                '',
+                'docs {',
+                '  Hello World',
+                '}',
+                '',
+                `${blockName} {`,
+                '}',
+                '',
+            ].join('\n')
+
+            const expected = ['', 'docs {', '  Hello World', '}', ''].join('\n')
+
+            expect.assertions(2)
+            return format(originalFileContents).then(result => {
+                expect(result.newContents).toBe(expected)
+                expect(result.changeable).toBe(true)
+            })
+        }
+    )
 
     it('removes excess whitespace and new lines between blocks', async () => {
         const originalFileContents = [
