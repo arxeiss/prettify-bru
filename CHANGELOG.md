@@ -16,7 +16,9 @@ expect(res.status).to.eql(200)
 expect(res.body.name).to.eql("Dave")
 ```
 
-Added ability to configure `agnosticFilePaths` and `shortenGetters` features in the [config file](README.md#config-file))
+Added ability to configure `agnosticFilePaths` and `shortenGetters` features in the [config file](README.md#config-file).
+
+Bug fix (introduced in 1.7.0): JSON bodies with comments were not formatted correctly.
 
 ## 1.7.0
 

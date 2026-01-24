@@ -19,7 +19,7 @@ tests {
     expect(res.getStatus()).to.eql(200)
   })
   
-  test("response code is 200", () => {
+  test("response body contains correct name", () => {
     expect(res.getBody().name).to.eql("Phil")
   })
 }

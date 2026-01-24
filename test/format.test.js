@@ -385,6 +385,27 @@ describe('The format() function', () => {
         })
     })
 
+    it('handles multiple lines with non-string placeholders and comments', async () => {
+        // In an earlier version of the code, contents like this would get all mixed up with the
+        // comments moved to a new line which then swallows up the next property and made a mess
+        const originalContents = [
+            '',
+            'body:json {',
+            '  {',
+            '    "grapes": {{oneHundredItems}}, // These are the grapes',
+            '    "moreGrapes": {{oneHundredItems}} // Another non-string placeholder',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(2)
+        return format(originalContents).then(result => {
+            expect(result.newContents).toBe(originalContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
     it('leaves string placeholders in body:json untouched', async () => {
         const badlyFormattedFileContents = [
             'meta {',

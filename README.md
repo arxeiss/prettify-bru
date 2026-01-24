@@ -5,7 +5,7 @@ A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/pac
 Removes junk and makes code shorter and more transferable between systems.
 Imposes a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
 
-`body:json` blocks are formatted using [fast-json-format](https://github.com/usebruno/fast-json-format)
+`body:json` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser)
 
 `script:pre-request`, `script:post-response` and `tests` blocks are formatted using [Prettier](https://prettier.io/) with [Babel](https://babeljs.io/docs/babel-parser) parser.
 
