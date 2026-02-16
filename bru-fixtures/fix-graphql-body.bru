@@ -13,13 +13,13 @@ post {
 body:graphql {
   mutation createCocktail(
       $name: String!
-      $displayName: String
       $description: String
   ) {
     createCocktail(
       input: {
           name: $name,
-            displayName: $displayName,
+            type: "{{some_placeholder_inside_quotes}}",
+            displayName: {{some_placeholder_without_quotes}},
         description: $description}
     ) {
       id
