@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.2
+
+Fixes bug formatting JSON with a placeholder as a key. Found and fixed by [Pavel Kutáč](https://github.com/arxeiss) ([arxeiss](https://github.com/arxeiss)) 💪.
+
 ## 1.9.1
 
 Fixes bug affecting text output in environments that do not support text colourisation/styling. Another excellent contribution by [Pavel Kutáč](https://github.com/arxeiss) ([arxeiss](https://github.com/arxeiss)).
