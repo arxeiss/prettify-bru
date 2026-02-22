@@ -462,7 +462,12 @@ describe('The format() function', () => {
                 '',
                 `${blockName} {`,
                 '  {',
-                '    "grapes": {{oneHundredItems}}', // A non-string placeholder has no double-quotes so it's not valid JSON
+                '    "grapes": {{oneHundredItems}},', // A non-string placeholder has no double-quotes so it's not valid JSON
+                '    "moreGrapes": [',
+                '      "item1",',
+                '      {{oneHundredItemsInArray}}',
+                '    ]',
+                '    {{placeholderAsJsonKey}}: "{{name}}",',
                 '  }',
                 '}',
                 '',
@@ -478,9 +483,9 @@ describe('The format() function', () => {
 
             expect.assertions(3)
             return format(correctlyFormattedFileContents).then(result => {
+                expect(result.newContents).toBe(correctlyFormattedFileContents)
                 expect(result.changeable).toBe(false)
                 expect(result.errorMessages).toStrictEqual([])
-                expect(result.newContents).toBe(correctlyFormattedFileContents)
             })
         }
     )
@@ -496,7 +501,8 @@ describe('The format() function', () => {
                 `${blockName} {`,
                 '  {',
                 '  "grapes":{{oneHundredItems}} , ', // A non-string placeholder has no double-quotes so it's not valid JSON
-                '        "moreGrapes":    {{oneHundredItems}} ', // Another non-string placeholder
+                '        "moreGrapes":    ["item1", {{oneHundredItemsInArray}}], ', // Another non-string placeholder
+                '      {{placeholderAsJsonKey}}  : "{{name}}",',
                 '  }',
                 '}',
                 '',
@@ -518,7 +524,11 @@ describe('The format() function', () => {
                 `${blockName} {`,
                 '  {',
                 '    "grapes": {{oneHundredItems}},',
-                '    "moreGrapes": {{oneHundredItems}}',
+                '    "moreGrapes": [',
+                '      "item1",',
+                '      {{oneHundredItemsInArray}}',
+                '    ],',
+                '    {{placeholderAsJsonKey}}: "{{name}}",',
                 '  }',
                 '}',
                 '',
@@ -551,7 +561,10 @@ describe('The format() function', () => {
                 `${blockName} {`,
                 '  {',
                 '    "grapes": {{oneHundredItems}}, // These are the grapes',
-                '    "moreGrapes": {{oneHundredItems}} // Another non-string placeholder',
+                '    "moreGrapes": [',
+                '      "item1",',
+                '      {{oneHundredItems}}, // Another non-string placeholder',
+                '    ] // Another non-string placeholder',
                 '  }',
                 '}',
                 '',
@@ -604,6 +617,140 @@ describe('The format() function', () => {
             })
         }
     )
+
+    it('handles Bruno variable placeholders in GraphQL queries', async () => {
+        const badlyFormattedFileContents = [
+            'meta {',
+            '  name: Test GraphQL with Bruno Placeholders',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createUser {',
+            '      createUser(input: {',
+            '    name: "{{userName}}",',
+            '        email: "{{userEmail}}",',
+            '      age: {{userAge}}',
+            '    }) {',
+            '        id',
+            '    name',
+            '      }',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Test GraphQL with Bruno Placeholders',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createUser {',
+            '    createUser(',
+            '      input: {',
+            '        name: "{{userName}}"',
+            '        email: "{{userEmail}}"',
+            '        age: {{userAge}}',
+            '      }',
+            '    ) {',
+            '      id',
+            '      name',
+            '    }',
+            '  }',
+            '  ',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(badlyFormattedFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
+    it('handles placeholders in GraphQL array arguments', async () => {
+        const badlyFormattedFileContents = [
+            'meta {',
+            '  name: GraphQL Array Placeholders',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation addTags {',
+            '      addTags(productId: {{productId}}, tags: [',
+            '    "{{tag1}}",',
+            '        "{{tag2}}",',
+            '      {{dynamicTags}}',
+            '    ]) {',
+            '        id',
+            '    tags',
+            '      }',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: GraphQL Array Placeholders',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation addTags {',
+            '    addTags(',
+            '      productId: {{productId}}',
+            '      tags: ["{{tag1}}", "{{tag2}}", {{dynamicTags}}]',
+            '    ) {',
+            '      id',
+            '      tags',
+            '    }',
+            '  }',
+            '  ',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(badlyFormattedFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
+    it('handles placeholders with GraphQL comments', async () => {
+        const correctlyFormattedFileContents = [
+            'meta {',
+            '  name: GraphQL Placeholders with Comments',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createOrder {',
+            '    # Create a new order with dynamic values',
+            '    createOrder(',
+            '      input: {',
+            '        userId: {{userId}} # User ID placeholder',
+            '        total: {{orderTotal}} # Order total placeholder',
+            '      }',
+            '    ) {',
+            '      id',
+            '      # Return the order status',
+            '      status',
+            '    }',
+            '  }',
+            '  ',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(correctlyFormattedFileContents).then(result => {
+            expect(result.newContents).toBe(correctlyFormattedFileContents)
+            expect(result.changeable).toBe(false)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
 
     /* Coverage of the `only` argument... */
 

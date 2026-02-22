@@ -29,13 +29,13 @@ body:graphql {
       __typename
     }
   }
-  
+
 }
 
 body:graphql:vars {
   {
     "name" : "{{customerName}}",
-      "displayName": "{{customerDisplayName}}",
+      {{placeholder_as_json_key}}: "{{customerDisplayName}}",
     "description": "{{customerDescription}}"
   }
 }
