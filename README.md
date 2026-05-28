@@ -5,7 +5,7 @@ A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/pac
 Removes junk and makes code shorter and more transferable between systems.
 Imposes a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
 
-`body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser)
+`body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser) by default, or optionally with [Prettier](https://prettier.io/) using the `jsonc` parser when the `prettifyJson` option is enabled.
 
 `script:pre-request`, `script:post-response` and `tests` blocks are formatted using [Prettier](https://prettier.io/) with [Babel](https://babeljs.io/docs/babel-parser) parser.
 
@@ -28,6 +28,7 @@ Imposes a standard format on all blocks of JSON and JavaScript code across multi
 - [Config file](#config-file)
   - [Agnostic File Paths](#agnostic-file-paths)
   - [Shorten Getters](#shorten-getters)
+  - [Prettify JSON](#prettify-json)
   - [Prettier](#prettier)
 - [Automatically checking PRs](#automatically-checking-prs)
 <!-- TOC -->
@@ -120,6 +121,16 @@ Some values target groups of blocks:
 - "script" will do both `script:pre-request` and `script:post-response`
 - "body" will target all 3 body blocks `body:json`, `body:graphql` and `body:graphql:vars`
 
+### Use Prettier for JSON formatting
+
+By default, `body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser). To use Prettier instead, add the `--prettify-json` flag:
+
+```
+npx prettify-bru --prettify-json --write
+```
+
+This will format JSON blocks using Prettier's `jsonc` parser with trailing commas disabled, producing valid JSON with comment support (which Bruno strips out). Note that this will not be in sync with the "Prettify" button in Bruno's UI, but the output will be valid JSON without trailing commas.
+
 ### Complex example
 
 Fix the formatting of just the `body:json` block in 1 specific file:
@@ -165,6 +176,24 @@ The above will become...
 expect(res.status).to.eql(200)
 expect(res.body.name).to.eql("Dave")
 ```
+
+### Prettify JSON
+
+Property: `prettifyJson` {boolean} (Default: `false`)
+
+Use Prettier (instead of jsonc-parser) to format `body:json` and `body:graphql:vars` blocks. When enabled, these blocks are formatted using Prettier's `jsonc` parser with trailing commas disabled.
+
+**Note:** This will not be in sync with the "Prettify" button in Bruno's UI, but the output will be valid JSON (no trailing commas, etc.) with comment support that Bruno trims out.
+
+To enable this in your config file:
+
+```json
+{
+    "prettifyJson": true
+}
+```
+
+Alternatively, you can use the `--prettify-json` CLI flag to enable this on a per-run basis.
 
 ### Prettier
 

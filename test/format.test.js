@@ -989,4 +989,77 @@ describe('The format() function', () => {
             expect(result.changeable).toBe(false)
         })
     })
+
+    it.each(['body:json', 'body:graphql:vars'])(
+        'uses Prettier for %s when prettifyJson is enabled with no trailing commas',
+        async blockName => {
+            const originalFileContents = [
+                '',
+                blockName + ' {',
+                '  {',
+                '      "this": [ {{somePlaceholder}}, "b", "c",],',
+                '  "number": 7,',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            const expected = [
+                '',
+                blockName + ' {',
+                '  {',
+                '    "this": [{{somePlaceholder}}, "b", "c"],',
+                '    "number": 7',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            const config = {prettifyJson: true}
+
+            expect.assertions(3)
+            return format(originalFileContents, null, config).then(result => {
+                console.log(result.newContents)
+                expect(result.newContents).toBe(expected)
+                expect(result.errorMessages).toStrictEqual([])
+                expect(result.changeable).toBe(true)
+            })
+        }
+    )
+
+    it('does not add trailing commas when prettifyJson is enabled', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            '  {',
+            '    "key1": "value1",',
+            '    "key2": "value2"',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {prettifyJson: true}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
+    it('returns error when Prettier cannot format body:json with prettifyJson enabled', async () => {
+        const invalidJson = '{"key": invalid}'
+        const originalFileContents = ['', 'body:json {', `  ${invalidJson}`, '}', ''].join('\n')
+
+        const config = {prettifyJson: true}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.errorMessages).toHaveLength(1)
+            expect(result.errorMessages[0]).toContain(
+                'Prettier could not format body:json because...'
+            )
+        })
+    })
 })

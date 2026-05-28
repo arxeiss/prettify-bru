@@ -31,24 +31,36 @@ const argv = yargs(hideBin(process.argv))
             type: 'boolean',
             default: false,
         },
+        'prettify-json': {
+            describe:
+                'Use Prettier (instead of jsonc-parser) for body:json and body:graphql:vars blocks',
+            type: 'boolean',
+            default: false,
+        },
     })
-    .boolean(['w', 'h'])
+    .boolean(['w', 'h', 'prettify-json'])
     .alias('h', 'help')
     .parse()
 
 if (argv.h) {
     yargs.showHelp()
 } else {
-    go(argv.path, argv.w, argv.only ?? null)
+    go(argv.path, argv.w, argv.only ?? null, argv['prettify-json'])
 }
 
 /**
  * @param {string} path
  * @param {boolean} write Whether to actually modify the files or not
  * @param {?string} only Limit to only the block type with a name containing value
+ * @param {boolean} prettifyJson Whether to use Prettier for JSON blocks
  */
-function go(path, write, only) {
-    main(console, process.cwd(), path, write, only)
+function go(path, write, only, prettifyJson) {
+    const cliConfig = {}
+    if (prettifyJson) {
+        cliConfig.prettifyJson = true
+    }
+
+    main(console, process.cwd(), path, write, only, cliConfig)
         .then(changesRequired => {
             if (changesRequired) {
                 process.exitCode = 1

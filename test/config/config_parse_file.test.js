@@ -52,6 +52,17 @@ describe('parseFile() function in config module', () => {
         expect(config).toEqual({})
     })
 
+    it('warns if `prettifyJson` is not a boolean', () => {
+        const mockConsole = {log: jest.fn(), warn: jest.fn()}
+        // This config incorrectly sets `prettifyJson` property as a string
+        const config = parseFile(mockConsole, '{"prettifyJson": "yes"}')
+
+        expect(mockConsole.warn).toHaveBeenCalledWith(
+            `⚠️  ${styleText('yellow', '"prettifyJson" is not correct type, it should be a boolean')}`
+        )
+        expect(config).toEqual({})
+    })
+
     it('warns if `prettier` is not an object', () => {
         const mockConsole = {log: jest.fn(), warn: jest.fn()}
         // This config incorrectly provides an array for the prettier property
@@ -85,6 +96,13 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{"shortenGetters": false}')
 
         expect(config).toEqual({shortenGetters: false})
+    })
+
+    it('transfers `prettifyJson` property', () => {
+        const mockConsole = {log: jest.fn()}
+        const config = parseFile(mockConsole, '{"prettifyJson": true}')
+
+        expect(config).toEqual({prettifyJson: true})
     })
 
     it('transfers `prettier` property', () => {
